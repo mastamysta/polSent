@@ -1,6 +1,12 @@
 import pandas as pd
 import numpy as np
 
+#removes all but latin leters
+def filterNonLatin(myStr):
+    whitelist = set('abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
+    answer = ''.join(filter(whitelist.__contains__, myStr))
+    return answer
+
 #returns dataframe cotaining lexicon
 def getLexicon():
     return pd.read_csv("politics.tsv",sep='\t')
@@ -21,7 +27,8 @@ def findSumScore(tweet, h):
     return sum
 
 def findAverageScore(tweet, h):
-    tokenList = tweet.split()
+    #cheeky line of cleaning the string here
+    tokenList = filterNonLatin(tweet.lower()).split()
     sum = 0
     for tok in tokenList:
         if tok in h:
@@ -30,12 +37,17 @@ def findAverageScore(tweet, h):
     return sum/len(tokenList)
 
 def analyse(tweets):
-    scores = [findAverageScore for tweet in tweets]
-
-def test():
     lex = getLexicon()
     h = createHash(lex)
-    print(findAverageScore("I am a giant loser", h))
+    scores = [findAverageScore(tweet, h) for tweet in tweets]
+    scoreFrame = pd.DataFrame()
+    scoreFrame["tweet"] = tweets
+    scoreFrame["score"] = scores
+    return scoreFrame
+
+
+def test():
+    print(analyse(["Lib cucks live in my crawl space and it makes me happy at night"]))
 
 if __name__ == '__main__':
     test()
